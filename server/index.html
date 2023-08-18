@@ -28,11 +28,6 @@
         var resultArray = {};
 
 
-        // Prime and probe.txt object
-        function PrimeProbeTxt(sets, ways) {
-            // (not part of the summer school material)
-        }
-
         // Prime and probe object
         function PrimeProbe(sets, ways) {
             this.evictionArray = new Uint32Array(32 * BYTES_PER_MB / Uint32Array.BYTES_PER_ELEMENT);
@@ -122,9 +117,6 @@
             PP = new PrimeProbe(sets, ways);
         }
 
-        function createPPTextObject(sets, ways) {
-            // (not part of the summer school material)
-        }
 
         function probeAllSets() {
             var startTime = performance.now();
@@ -296,7 +288,7 @@
 
         }
         // SUMMER SCHOOL CODE  🍌🏝️🥂🦵🏻🦵🏽🦵🏿
-        // 1. Make sure you can runt the python web server (or put the page online somewhere)
+        // 1. Make sure you can run the python web server (or put the page online somewhere)
         // 2. Make sure you can load the page with your browser
         // 3. Play with the properties of the measurement in lines 14-20 until you get nice statistics
         // 4. Create an SD-URL, load it, and verify that it looks different for the target and non-target users
