@@ -8,12 +8,9 @@
 
         const COUNT_SWEEPS = true; // if false, measure time. if true, measure how many cache sweeps we get until the clock changes
         
-        // (not part of the summer school material)
-        // vvv please do not change vvv
-        const USE_ARRAYS = true; // if true, use ByteArrays. If false, just use a large string.
-        const USE_WEBSOCKETS = false; // if true, don't measure time directly, use the WebSockets server instead
-
         // Cache size constants.
+        // VVV
+        // Play with these until you get nice statistics.
         const CACHE_SETS = 8192; const CACHE_WAYS = 12;
         const SET_SKIPPING_STEP = 2;
 
@@ -21,6 +18,7 @@
         // increase SAMPLING_PERIOD_IN_MS to 100 and reduce MEASUREMENT_COUNT accordingly
         const MEASUREMENT_COUNT = 500;
         const SAMPLING_PERIOD_IN_MS = 5;
+        // ^^^
 
         const BYTES_PER_MB = 1024 * 1024;
         const BYTES_PER_LINE = 64;
@@ -120,10 +118,6 @@
         } // PP object.
 
 
-        // Connect to the websockets server, wait until it connects
-        // (not part of the summer school material)
-
-
         function createPPObject(sets, ways) {
             PP = new PrimeProbe(sets, ways);
         }
@@ -146,58 +140,48 @@
             resultArray = new Array(MEASUREMENT_COUNT);
             var nextMeasurementStartTime, currentTime;
 
-            // If we're using websockets, wait until the server opens, then send the first measurement to calibrate the deltas
-            if (USE_WEBSOCKETS == true) {
-                // (not part of the summer school material)
-            } else {
-                // Otherwise use local timers.
-                nextMeasurementStartTime = performance.now() + SAMPLING_PERIOD_IN_MS;
+            // Otherwise use local timers.
+            nextMeasurementStartTime = performance.now() + SAMPLING_PERIOD_IN_MS;
 
-                // Spin until we're ready for the next measurement
-                do {
-                    currentTime = performance.now();
-                }
-                while (currentTime < nextMeasurementStartTime);
+            // Spin until we're ready for the next measurement
+            do {
+                currentTime = performance.now();
             }
+            while (currentTime < nextMeasurementStartTime);
 
             // For each measurement period
             var measurement_index;
             for (measurement_index = 0; measurement_index < MEASUREMENT_COUNT; measurement_index++) {
 
-                // If we use websockets just prime and send a message to the server
-                if (USE_WEBSOCKETS == true) {
-                    // (not part of the summer school material)
-                } else {
-                    // Prepare for the next measurement
-                    nextMeasurementStartTime += SAMPLING_PERIOD_IN_MS;
+                // Prepare for the next measurement
+                nextMeasurementStartTime += SAMPLING_PERIOD_IN_MS;
 
-                    if (COUNT_SWEEPS == true) {
-                        var sweeps = 0;
-                        // repeatedly perform the measurement until the clock changes
-                        do {
-                            currentTime = performance.now();
-                            sweeps++;
-                            PP.probeAllSets();
-                        } while (currentTime < nextMeasurementStartTime);
-                    } else {
-                        // otherwise, perform the measurement
-                        PP.probeAllSets(SET_SKIPPING_STEP);
-                    }
-
-                    // Log the time it took
-                    if (COUNT_SWEEPS == true) {
-                        // log how many spins it took until the clock ticked again
-                        resultArray[measurement_index] = sweeps;
-                    } else {
-                        resultArray[measurement_index] = (performance.now() - currentTime);
-                    }
-
-                    // Spin until the next measurement starts
+                if (COUNT_SWEEPS == true) {
+                    var sweeps = 0;
+                    // repeatedly perform the measurement until the clock changes
                     do {
                         currentTime = performance.now();
-                    }
-                    while (currentTime < nextMeasurementStartTime);
-                } // if (use_websockets)
+                        sweeps++;
+                        PP.probeAllSets();
+                    } while (currentTime < nextMeasurementStartTime);
+                } else {
+                    // otherwise, perform the measurement
+                    PP.probeAllSets(SET_SKIPPING_STEP);
+                }
+
+                // Log the time it took
+                if (COUNT_SWEEPS == true) {
+                    // log how many spins it took until the clock ticked again
+                    resultArray[measurement_index] = sweeps;
+                } else {
+                    resultArray[measurement_index] = (performance.now() - currentTime);
+                }
+
+                // Spin until the next measurement starts
+                do {
+                    currentTime = performance.now();
+                }
+                while (currentTime < nextMeasurementStartTime);
             }
 
             console.log("Finished measurement")
@@ -277,8 +261,47 @@
                 return val.toFixed ? Number(val.toFixed(precision)) : val;
             });
         }
-        // SUMMER SCHOOL CODE GOES HERE
-        // LALALALALALALA
+
+        // Draw a preview of the trace onscreen
+        function visualiseTrace(trace, canvas) {
+            var ctx = canvas.getContext("2d");
+
+            // blank out the canvas
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // draw the trace
+            var ymin=Math.min(...trace);
+            var ymax=Math.max(...trace);
+            var xmin=0;
+            var xmax=trace.length;
+
+            // Use a thick line with markers
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "black";
+            ctx.moveTo(0, 0);
+            ctx.beginPath();
+
+            for (var i = 0; i < trace.length; i++) {
+                ctx.lineTo((i-xmin)/(xmax-xmin)*canvas.width, (trace[i]-ymin)/(ymax-ymin)*canvas.height);
+
+                // add a marker
+                ctx.lineTo((i-xmin)/(xmax-xmin)*canvas.width+2, (trace[i]-ymin)/(ymax-ymin)*canvas.height);
+                ctx.lineTo((i-xmin)/(xmax-xmin)*canvas.width-2, (trace[i]-ymin)/(ymax-ymin)*canvas.height);
+                ctx.lineTo((i-xmin)/(xmax-xmin)*canvas.width, (trace[i]-ymin)/(ymax-ymin)*canvas.height);
+            }   
+
+            // finish the line
+            ctx.stroke();
+
+        }
+        // SUMMER SCHOOL CODE  🍌🏝️🥂🦵🏻🦵🏽🦵🏿
+        // 1. Make sure you can runt the python web server (or put the page online somewhere)
+        // 2. Make sure you can load the page with your browser
+        // 3. Play with the properties of the measurement in lines 14-20 until you get nice statistics
+        // 4. Create an SD-URL, load it, and verify that it looks different for the target and non-target users
+        // 5. Implement the isTargetUser function any way you like
+        // 6. Win the praise of your peers and the admiration of your teachers
         function summerSchoolCode() {
             console.log("Starting...");
             // Load a SD-URL
@@ -287,13 +310,13 @@
             // Play with some raw side-channel traces
             trace = captureSideChannelTrace();
 
-            // Convert the trace to fixed point for efficiency of presentation
-            var tracePreview = tracePreviewString(trace);
-
             // Get some statistics on the trace
             var traceStatistics = analyzeTrace(trace);
 
-            console.log("Measurement returned:" + tracePreview + fixedPointStringify(traceStatistics, 2));
+            // plot it onscreen
+            visualiseTrace(trace, document.getElementById("preview"));
+
+            console.log("Measurement returned:" + tracePreviewString(trace) + fixedPointStringify(traceStatistics, 2));
 
             // Try to detect if it's the target or non-target user
             var isTarget = isTargetUser(trace, traceStatistics);
@@ -321,11 +344,11 @@
 
 <body>
 
- 
-<button onclick="go()">Go!</button>
-<div id="results" style="width:100%; word-wrap: break-word;"></div>
-<br>
-<a href="https://github.com/Yossioren/pp0">For more information</a>
+    <button onclick="go()">Go!</button><br>
+    <canvas id="preview" width="1000" height="500" style="mix-blend-mode: multiply;"></canvas>   
+    <div id="results" style="width:100%; word-wrap: break-word;"></div>
+    <br>
+    <a href="https://github.com/Yossioren/pp0">For more information</a>
 </body>
 
 </html>
